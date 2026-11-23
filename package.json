@@ -1,0 +1,27 @@
+{
+  "name": "suna-paint",
+  "version": "0.1.0",
+  "description": "砂ペイント (Suna Paint) — a browser falling-sand painting simulator. Open-source snapshot for learning and customization.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tabler/icons-react": "3.36.1",
+    "pako": "2.1.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/pako": "2.0.3",
+    "@types/react": "19.2.13",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "4.3.4",
+    "typescript": "5.9.3",
+    "vite": "6.4.2"
+  }
+}

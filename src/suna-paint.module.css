@@ -1,0 +1,936 @@
+/* 単体版のスタイル。Weva 本体の vanilla-extract から CSS Modules へ移行し、
+   クラス名と見た目を引き継いでいる。
+   ブレークポイント: compact=1280px / stacked=1000px / mobile=720px
+   (SunaPaintPage.tsx の STACKED_TOOLBAR_QUERY / MOBILE_TOOLBAR_QUERY と一致させること) */
+
+.page {
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  color: #334155;
+  position: relative;
+  overflow: hidden;
+  overscroll-behavior-x: none;
+}
+
+.canvasLayer {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  width: 100vw;
+  height: calc(100dvh - 44px);
+  z-index: 1;
+  cursor: crosshair;
+  touch-action: none;
+  image-rendering: pixelated;
+}
+
+/* 狭い画面のツールバーは44pxの2段(計88px)に折り返すため、キャンバスをその下に置く。
+   SunaPaintPage.tsx の getHeaderHeight() と一致させること。 */
+@media (max-width: 1000px) {
+  .canvasLayer {
+    top: 88px;
+    height: calc(100dvh - 88px);
+  }
+}
+
+.uiLayer {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.toolbar {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  position: relative;
+  padding: 0 12px;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: visible;
+}
+
+.toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  .toolbar {
+    gap: 6px;
+    padding: 0 8px;
+  }
+}
+
+/* 2段構成: ツール/サイズ/重力/色(1段目)とアクション(2段目)。 */
+@media (max-width: 1000px) {
+  .toolbar {
+    backdrop-filter: none;
+    flex-wrap: wrap;
+    align-items: stretch;
+    align-content: flex-start;
+    justify-content: flex-start;
+    gap: 0;
+    height: 88px;
+    min-height: 88px;
+    overflow: visible;
+    padding: 0 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  }
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 12;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: visible;
+}
+
+.toolbarLeft::-webkit-scrollbar {
+  display: none;
+}
+
+/* 1段目: 全幅を占有し、ピッカーがはみ出す場合は横スクロールさせる。 */
+@media (max-width: 1000px) {
+  .toolbarLeft {
+    flex: 1 1 100%;
+    width: 100%;
+    height: 44px;
+    gap: 6px;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+  }
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 58px;
+  height: 24px;
+  overflow: visible;
+  margin-right: 0px;
+  flex-shrink: 0;
+}
+
+/* Weva 本体のロゴは、共有 HeaderLogo の createVar を上書きして縮小表示している。 */
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+
+@media (max-width: 1280px) {
+  .title {
+    margin-right: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .title {
+    display: none;
+  }
+}
+
+.dropdownContainer {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.dropdownTrigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dropdownTrigger:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dropdownTrigger[data-active="true"] {
+  background: #eff6ff;
+  color: #3b82f6;
+  border-color: #bfdbfe;
+}
+
+@media (max-width: 720px) {
+  .dropdownTrigger {
+    gap: 4px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+}
+
+.dropdownTriggerSwatch {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.dropdownTriggerText {
+  min-width: 0;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ドロップダウン見出しの説明語(「サイズ」「重力」)。モバイルでは非表示にして
+   1段目の幅を詰め、末尾の色ピッカーが見切れないようにする(値は残す)。 */
+@media (max-width: 720px) {
+  .triggerLabelWord {
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  min-width: 276px;
+  box-sizing: border-box;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  /* ブラシ種が増えたためデスクトップでもはみ出さないようスクロールさせる */
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.dropdownMenu[data-open="true"] {
+  display: flex;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@media (max-width: 720px) {
+  .dropdownMenu {
+    position: fixed;
+    top: 92px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    transform: none;
+    max-height: calc(100dvh - 108px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+}
+
+.brushGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* グループ見出し(きほん/天気 など)。グリッドの全カラムにまたがる行として表示する。 */
+.brushGroupLabel {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  padding: 6px 2px 0;
+  margin-top: 2px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.brushGroupLabel:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.brushButton {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 42px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.brushButton:hover {
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+.brushButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.brushButton[data-active="true"] {
+  background: #eff6ff;
+  border-color: #60a5fa;
+  color: #0f172a;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35);
+}
+
+.brushSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.brushLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settingRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.settingLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+}
+
+.settingValue {
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* キーボードで各メーターを操作するとき、現在位置を色だけに頼らず明示する。 */
+.slider:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.colorPreview {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.colorInput {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.settingHint {
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.presetRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.presetButton {
+  min-height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.presetButton:hover {
+  background: #f8fafc;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.segmentedControl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 3px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* 空(時間帯)の5択グリッド(なし/朝/昼/夕/夜) */
+.skyGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding: 3px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.segmentButton {
+  min-height: 28px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segmentButton:hover {
+  color: #0f172a;
+}
+
+.segmentButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.segmentButton[data-active="true"] {
+  background: #fff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.temperatureLegend {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.temperatureLegendCold {
+  color: #2563eb;
+}
+
+.temperatureLegendHot {
+  color: #dc2626;
+}
+
+.temperatureLegendBar {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb 0%, #e2e8f0 46%, #f97316 72%, #dc2626 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.fileInput {
+  display: none;
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 12;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.toolbarActions::-webkit-scrollbar {
+  display: none;
+}
+
+/* 2段目: アクションボタンを左寄せで詰める(等間隔に広げず、間延びを防ぐ)。
+   万一はみ出す時だけ横スクロール。 */
+@media (max-width: 1000px) {
+  .toolbarActions {
+    flex: 1 1 100%;
+    width: 100%;
+    height: 44px;
+    min-width: 0;
+    gap: 5px;
+    margin-left: 0;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}
+
+.toolbarScrollHint {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 44px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.78) 30%, rgba(255, 255, 255, 0.98) 62%, #fff);
+  color: #64748b;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* アクションボタンの通常ラベル(広い画面用)。中幅以下では短縮ラベルに
+   切り替えるため非表示にする。 */
+@media (max-width: 1280px) {
+  .actionButtonLabel {
+    display: none;
+  }
+}
+
+/* 中幅以下用の短縮ラベル。1段を保てる幅では余白を活かし、狭い幅では
+   2段目に収まるよう短い語にする。デスクトップでは非表示。 */
+.actionButtonLabelShort {
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  .actionButtonLabelShort {
+    display: inline;
+  }
+}
+
+.actionButton {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #334155;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.actionButton:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.actionButton:active {
+  transform: translateY(0);
+}
+
+.actionButton:disabled {
+  background: #cbd5e1;
+  border-color: #cbd5e1;
+  color: #f8fafc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.actionButton:disabled:hover {
+  background: #cbd5e1;
+  transform: none;
+}
+
+@media (max-width: 1280px) {
+  .actionButton {
+    gap: 3px;
+    padding: 6px 7px;
+    font-size: 11px;
+  }
+}
+
+.clearButton {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clearButton:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+@media (max-width: 1280px) {
+  .clearButton {
+    gap: 3px;
+    padding: 6px 7px;
+    font-size: 11px;
+  }
+}
+
+.saveModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.46);
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+  .saveModalOverlay {
+    align-items: flex-start;
+    padding: 12px;
+    padding-top: calc(env(safe-area-inset-top) + 12px);
+  }
+}
+
+.saveModalCard {
+  width: min(720px, 100%);
+  max-height: calc(100dvh - 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+  box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+  .saveModalCard {
+    max-height: calc(100dvh - env(safe-area-inset-top) - 24px);
+    padding: 12px;
+    gap: 10px;
+  }
+}
+
+.saveModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.saveModalTitle {
+  margin: 0;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.saveModalText {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.saveModalCloseButton {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+}
+
+.saveModalCloseButton:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.saveModalCloseButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.savePreviewFrame {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background:
+    linear-gradient(45deg, #f8fafc 25%, transparent 25%),
+    linear-gradient(-45deg, #f8fafc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f8fafc 75%),
+    linear-gradient(-45deg, transparent 75%, #f8fafc 75%);
+  background-color: #fff;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+.savePreviewImage {
+  display: block;
+  max-width: 100%;
+  max-height: min(58dvh, 520px);
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 720px) {
+  .savePreviewImage {
+    max-height: 48dvh;
+  }
+}
+
+.saveModalNotice {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.saveModalActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .saveModalActions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+}
+
+.saveModalPrimaryButton {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #334155;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.saveModalPrimaryButton:hover {
+  background: #1e293b;
+}
+
+.saveModalPrimaryButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.saveModalXButton {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.saveModalXButton:hover {
+  background: #020617;
+}
+
+.saveModalXButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.saveModalSecondaryButton {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.saveModalSecondaryButton:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.saveModalSecondaryButton:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+/* ===== ここから下は単体公開版(OSS)だけの上書き ===== */
+/* 本家は Weva 共有ロゴを置く枠だが、単体版は絵文字マークなので幅と寄せを合わせ直す。 */
+.logoContainer {
+  justify-content: center;
+  width: 28px;
+  font-size: 18px;
+  line-height: 1;
+}
